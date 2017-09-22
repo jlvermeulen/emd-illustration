@@ -19,6 +19,7 @@ class MainWindow(tk.Frame):
         self.pack(fill = 'both', expand = 1, padx = 5, pady = 5)
 
         tk.Grid.columnconfigure(self, 0, weight = 1)
+        tk.Grid.columnconfigure(self, 1, minsize = 100)
         tk.Grid.rowconfigure(self, 0, weight = 1)
 
         self.visualiser = Visualiser(self)
@@ -26,9 +27,10 @@ class MainWindow(tk.Frame):
 
         self.sidebar = tk.Frame(self)
         self.sidebar.grid(row = 0, column = 1, sticky = 'news')
+        tk.Grid.columnconfigure(self.sidebar, 0, weight = 1)
         tk.Grid.rowconfigure(self.sidebar, 6, weight = 1)
 
-        tk.Label(self.sidebar, text = 'Draw').grid(row = 0, column = 0)
+        tk.Label(self.sidebar, text = 'Draw').grid(row = 0, column = 0, sticky = 'news')
         self.category = tk.StringVar()
         self.type = tk.StringVar()
 
@@ -47,7 +49,7 @@ class MainWindow(tk.Frame):
                 button2.select()
                 button2.invoke()
 
-        tk.Label(self.sidebar, text = 'Options').grid(row = 5, column = 0)
+        tk.Label(self.sidebar, text = 'Options').grid(row = 5, column = 0, sticky = 'news')
 
         tk.Button(self.sidebar, text = 'Solve', command = self.solve).grid(row = 7, column = 0, sticky = 'news')
 
