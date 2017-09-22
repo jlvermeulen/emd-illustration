@@ -1,0 +1,41 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+            "folder_include_patterns": ["src"],
+            "file_include_patterns": ["*.py", "*.md"]
+        },
+    ],
+
+    "build_systems":
+    [
+        {
+            "name": "Python Project",
+            "selector": "source.python",
+            "shell_cmd": "pyinstaller --distpath $project_path/dist --workpath $project_path/build --specpath $project_path/build --onefile --noconfirm --windowed emd-illustrator.py",
+            "working_dir": "$project_path/src",
+
+            "variants":
+            [
+                {
+                    "name": "Run",
+                    "cmd": ["python", "emd-illustrator.py", "--data-dir", "../dist"],
+                    "shell_cmd": "",
+
+                    "linux":
+                    {
+                        "cmd": ["python3", "emd-illustrator.py", "--data-dir", "../dist"]
+                    }
+                },
+
+                {
+                    "name": "Test Release",
+                    "cmd": "$project_path/dist/emd-illustrator",
+                    "shell_cmd": "",
+                    "working_dir": "$project_path/dist"
+                }
+            ]
+        }
+    ]
+}
