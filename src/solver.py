@@ -6,7 +6,7 @@ class Solver:
     def set_subdivs(subdivs):
         self.subdivs = int(subdivs)
 
-    def solve_point_segment(self, point, segment):
+    def solve(self, sources, sinks):
         return 0
 
 solver = Solver()

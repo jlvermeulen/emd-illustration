@@ -21,55 +21,49 @@ class MainWindow(tk.Frame):
         tk.Grid.columnconfigure(self, 0, weight = 1)
         tk.Grid.rowconfigure(self, 0, weight = 1)
 
+        self.visualiser = Visualiser(self)
+        self.visualiser.grid(row = 0, column = 0, sticky = 'news', padx = (0, 5))
+
         self.sidebar = tk.Frame(self)
         self.sidebar.grid(row = 0, column = 1, sticky = 'news')
-        tk.Grid.rowconfigure(self.sidebar, 5, weight = 1)
+        tk.Grid.rowconfigure(self.sidebar, 6, weight = 1)
 
-        tk.Label(self.sidebar, text = 'Mode').grid(row = 0, column = 0)
-        self.mode = tk.StringVar()
+        tk.Label(self.sidebar, text = 'Draw').grid(row = 0, column = 0)
+        self.category = tk.StringVar()
+        self.type = tk.StringVar()
 
-        self.mode_options = {
-                                'point-point': Visualiser(self),
-                                'point-segment': Visualiser(self),
-                                'segment-segment': Visualiser(self)
-                            }
+        categories = ['source', 'sink']
+        types = ['point', 'segment']
+        for i in range(2):
+            button1 = tk.Radiobutton(self.sidebar, indicatoron = 0, text = categories[i].title(), variable = self.category, value = categories[i])
+            button1.grid(row = i + 1, column = 0, sticky = 'news', ipadx = 2, ipady = 2, pady = (0, 0 if i == 0 else 10))
 
-        i = 1
-        for name, value in self.mode_options.items():
-            button = tk.Radiobutton(self.sidebar, indicatoron = 0, text = name.title(), variable = self.mode, value = name, command = self.switch_mode)
-            button.grid(row = i, column = 0, sticky = 'news', ipadx = 2, ipady = 2)
+            button2 = tk.Radiobutton(self.sidebar, indicatoron = 0, text = types[i].title(), variable = self.type, value = types[i])
+            button2.grid(row = i + 3, column = 0, sticky = 'news', ipadx = 2, ipady = 2, pady = (0, 0 if i == 0 else 10))
 
-            value.grid(row = 0, column = 0, sticky = 'news', padx = (0, 5))
+            if i == 0:
+                button1.select()
+                button1.invoke()
+                button2.select()
+                button2.invoke()
 
-            if i == 2:
-                button.select()
-                button.invoke()
-            i += 1
+        tk.Label(self.sidebar, text = 'Options').grid(row = 5, column = 0)
 
-        tk.Label(self.sidebar, text = 'Options').grid(row = 4, column = 0, pady = (10, 0))
-
-        tk.Button(self.sidebar, text = 'Solve', command = self.solve).grid(row = 6, column = 0, sticky = 'news')
+        tk.Button(self.sidebar, text = 'Solve', command = self.solve).grid(row = 7, column = 0, sticky = 'news')
 
     def destroy(self):
         settings.set('main_window_geometry', self._nametowidget(self.winfo_parent()).geometry())
         settings.save()
         super().destroy()
 
-    def switch_mode(self):
-        self.mode_options[self.mode.get()].tkraise()
-        settings.set('mode', self.mode.get())
-
     def solve(self):
-        mode = self.mode.get()
-        if mode == 'point-segment':
-            point = Point(10, 10)
-            segment = Segment(Point(100, 30), Point(70, 80))
-            solver.solve_point_segment(point, segment)
+        point = Point(10, 10)
+        segment = Segment(Point(100, 30), Point(70, 80))
+        #solver.solve(point, segment)
 
-            visualiser = self.mode_options[mode]
-            visualiser.draw_point(point)
-            visualiser.draw_segment(segment)
-            visualiser.draw_flow(point, Point(85, 55))
+        self.visualiser.draw_point(point, True)
+        self.visualiser.draw_segment(segment, False)
+        self.visualiser.draw_flow(point, Point(85, 55))
 
 def main():
     root = tk.Tk()
