@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from geometry import *
+import geometry
 
 class Visualiser(tk.Frame):
     def __init__(self, parent):
@@ -25,7 +25,13 @@ class Visualiser(tk.Frame):
         self.draw_segment_(segment, 1, 'black' if issource else 'blue')
 
     def draw_flow(self, source, sink):
-        self.draw_segment_(Segment(source, sink), 0, 'red')
+        self.draw_segment_(geometry.Segment(source, sink), 0, 'red')
+
+    def draw(self, obj, issource):
+        if isinstance(obj, geometry.Point):
+            self.draw_point(obj, issource)
+        elif isinstance(obj, geometry.Segment):
+            self.draw_segment(obj, issource)
 
     def clear(self):
         self.canvas.delete('all')

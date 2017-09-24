@@ -3,7 +3,7 @@
 from tkinter import ttk
 import tkinter as tk
 
-import settings
+import settings, loader
 from geometry import *
 from solver import solver
 from visualiser import Visualiser
@@ -28,9 +28,11 @@ class MainWindow(tk.Frame):
         self.sidebar = tk.Frame(self)
         self.sidebar.grid(row = 0, column = 1, sticky = 'news')
         tk.Grid.columnconfigure(self.sidebar, 0, weight = 1)
-        tk.Grid.rowconfigure(self.sidebar, 6, weight = 1)
+        tk.Grid.rowconfigure(self.sidebar, 7, weight = 1)
 
-        tk.Label(self.sidebar, text = 'Draw').grid(row = 0, column = 0, sticky = 'news')
+        tk.Button(self.sidebar, text = 'Load file', command = self.load_file).grid(row = 0, column = 0, sticky = 'news')
+
+        tk.Label(self.sidebar, text = 'Draw').grid(row = 1, column = 0, sticky = 'news', pady = (10, 0))
         self.category = tk.StringVar()
         self.type = tk.StringVar()
 
@@ -38,10 +40,10 @@ class MainWindow(tk.Frame):
         types = ['point', 'segment']
         for i in range(2):
             button1 = tk.Radiobutton(self.sidebar, indicatoron = 0, text = categories[i].title(), variable = self.category, value = categories[i])
-            button1.grid(row = i + 1, column = 0, sticky = 'news', ipadx = 2, ipady = 2, pady = (0, 0 if i == 0 else 10))
+            button1.grid(row = i + 2, column = 0, sticky = 'news', ipadx = 2, ipady = 2, pady = (0, 0 if i == 0 else 10))
 
             button2 = tk.Radiobutton(self.sidebar, indicatoron = 0, text = types[i].title(), variable = self.type, value = types[i])
-            button2.grid(row = i + 3, column = 0, sticky = 'news', ipadx = 2, ipady = 2, pady = (0, 0 if i == 0 else 10))
+            button2.grid(row = i + 4, column = 0, sticky = 'news', ipadx = 2, ipady = 2, pady = (0, 0 if i == 0 else 10))
 
             if i == 0:
                 button1.select()
@@ -49,14 +51,21 @@ class MainWindow(tk.Frame):
                 button2.select()
                 button2.invoke()
 
-        tk.Label(self.sidebar, text = 'Options').grid(row = 5, column = 0, sticky = 'news')
+        tk.Label(self.sidebar, text = 'Options').grid(row = 6, column = 0, sticky = 'news')
 
-        tk.Button(self.sidebar, text = 'Solve', command = self.solve).grid(row = 7, column = 0, sticky = 'news')
+        tk.Button(self.sidebar, text = 'Solve', command = self.solve).grid(row = 8, column = 0, sticky = 'news')
 
     def destroy(self):
         settings.set('main_window_geometry', self._nametowidget(self.winfo_parent()).geometry())
         settings.save()
         super().destroy()
+
+    def load_file(self):
+        data = loader.load('test.json')
+        for source in data['sources']:
+            self.visualiser.draw(source, True)
+        for sink in data['sinks']:
+            self.visualiser.draw(sink, False)
 
     def solve(self):
         point = Point(10, 10)
