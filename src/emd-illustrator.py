@@ -77,7 +77,7 @@ class MainWindow(tk.Frame):
         subs = tk.Label(subdivisions, text = 'Subdivisions:')
         spin = tk.Spinbox(subdivisions, from_ = 0, to = 20, width = 5)
 
-        subs.pack(side = 'left', anchor = 's')
+        subs.pack(side = 'left')
         spin.pack(side = 'left')
 
 
