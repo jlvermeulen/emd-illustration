@@ -3,9 +3,8 @@
 from tkinter import ttk
 import tkinter as tk
 
-import settings, loader, dialog
+import settings, solver, loader, dialog
 from geometry import *
-from solver import solver
 from visualiser import Visualiser
 
 import os.path, cProfile
@@ -74,11 +73,11 @@ class MainWindow(tk.Frame):
                 button2.select()
                 button2.invoke()
 
-        subs = tk.Label(subdivisions, text = 'Subdivisions:')
-        spin = tk.Spinbox(subdivisions, from_ = 0, to = 20, width = 5)
+        subdivions_label        = tk.Label(subdivisions, text = 'Subdivisions:')
+        self.subdivions_entry   = tk.Spinbox(subdivisions, from_ = 0, to = 100, width = 5)
 
-        subs.pack(side = 'left')
-        spin.pack(side = 'left')
+        subdivions_label        .pack(side = 'left')
+        self.subdivions_entry   .pack(side = 'left')
 
 
     def destroy(self):
@@ -89,6 +88,8 @@ class MainWindow(tk.Frame):
     def load_file(self):
         filename = dialog.browse_json(self)
         self.data = loader.load(filename)
+        if len(self.data['sources']) != len(self.data['sinks']):
+            print('Warning: number of sources and sinks not equal, this is currently not supported.')
 
         self.visualiser.clear()
         for source in self.data['sources']:
@@ -97,7 +98,8 @@ class MainWindow(tk.Frame):
             self.visualiser.draw(sink, False)
 
     def solve(self):
-        return
+        solution = solver.solve(self.data['sources'], self.data['sinks'], int(self.subdivions_entry.get()))
+        self.visualiser.draw_solution(solution)
 
 def main():
     root = tk.Tk()
