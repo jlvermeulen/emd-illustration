@@ -1,0 +1,54 @@
+{
+    "sources":
+    [
+
+            {
+                "type": "point",
+                "x": 550,
+                "y": 300,
+                "weight": 1
+            },
+            {
+                "type": "point",
+                "x": 550,
+                "y": 500,
+                "weight": 1
+            }
+    ],
+
+    "sinks":
+    [
+        {
+            "type": "segment",
+            "start":
+            {
+                "type": "point",
+                "x": 400,
+                "y": 100
+            },
+            "end":
+            {
+                "type": "point",
+                "x": 700,
+                "y": 100
+            },
+            "weight": 1
+        },
+        {
+            "type": "segment",
+            "start":
+            {
+                "type": "point",
+                "x": 400,
+                "y": 200
+            },
+            "end":
+            {
+                "type": "point",
+                "x": 700,
+                "y": 200
+            },
+            "weight": 1
+        }
+    ]
+}
