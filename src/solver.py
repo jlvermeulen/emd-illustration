@@ -3,8 +3,8 @@ from scipy.optimize import linear_sum_assignment
 
 import geometry
 
-def solve(sources, sinks, subdivs):
-    subbed_sources, subbed_sinks = subdivide(sources, sinks, subdivs)
+def solve(data, subdivs):
+    subbed_sources, subbed_sinks = subdivide(data['sources'], data['sinks'], subdivs)
     cost_matrix = []
     for source in subbed_sources:
         cost_matrix.append(calculate_costs(source, subbed_sinks))

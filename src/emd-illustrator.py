@@ -3,7 +3,7 @@
 from tkinter import ttk
 import tkinter as tk
 
-import settings, solver, loader, dialog
+import settings, solver, loader, exporter, dialog
 from geometry import *
 from visualiser import Visualiser
 
@@ -42,6 +42,7 @@ class MainWindow(tk.Frame):
         subdivisions    = tk.Frame(self.sidebar)
         separator3      = ttk.Separator(self.sidebar)
         solve_button    = tk.Button(self.sidebar, text = 'Solve', command = self.solve)
+        export_button   = tk.Button(self.sidebar, text = 'Export', command = self.export)
         clear_button    = tk.Button(self.sidebar, text = 'Clear', command = self.visualiser.clear)
 
         load_button     .grid(row = 0, column = 0, sticky = 'news')
@@ -53,7 +54,8 @@ class MainWindow(tk.Frame):
         subdivisions    .grid(row = 6, column = 0, sticky = 'news')
         separator3      .grid(row = 7, column = 0, sticky = 'news', pady = 5)
         solve_button    .grid(row = 8, column = 0, sticky = 'news')
-        clear_button    .grid(row = 9, column = 0, sticky = 'news')
+        export_button   .grid(row = 9, column = 0, sticky = 'news')
+        clear_button    .grid(row = 10, column = 0, sticky = 'news')
 
         tk.Grid.columnconfigure(toggles, 0, weight = 1, uniform = 'toggles')
         tk.Grid.columnconfigure(toggles, 1, weight = 1, uniform = 'toggles')
@@ -91,15 +93,20 @@ class MainWindow(tk.Frame):
         if len(self.data['sources']) != len(self.data['sinks']):
             print('Warning: number of sources and sinks not equal, this is currently not supported.')
 
-        self.visualiser.clear()
-        for source in self.data['sources']:
-            self.visualiser.draw(source, True)
-        for sink in self.data['sinks']:
-            self.visualiser.draw(sink, False)
+        self.visualiser.draw_all(self.data)
 
     def solve(self):
-        solution = solver.solve(self.data['sources'], self.data['sinks'], int(self.subdivions_entry.get()))
-        self.visualiser.draw_solution(solution)
+        self.solution = solver.solve(self.data, int(self.subdivions_entry.get()))
+        self.visualiser.draw_all(self.solution)
+
+    def export(self):
+        if hasattr(self, 'solution'):
+            dialog.empty_export(self)
+            return
+
+        filename = dialog.browse_export(self)
+        if filename:
+            exporter.export(self.solution, filename)
 
 def main():
     root = tk.Tk()

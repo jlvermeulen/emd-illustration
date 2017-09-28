@@ -4,7 +4,8 @@ import os, os.path, argparse
 
 settings =  {
                 'main_window_geometry': '1280x720+100+100',
-                'last_opened_source_dir': './'
+                'last_opened_source_dir': './',
+                'export_file': './solution.json'
             }
 
 def load():

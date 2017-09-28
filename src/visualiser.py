@@ -33,14 +33,17 @@ class Visualiser(tk.Frame):
         elif isinstance(obj, geometry.Segment):
             self.draw_segment(obj, issource)
 
-    def draw_solution(self, solution):
+    def draw_all(self, data):
         self.clear()
-        for source in solution['sources']:
-            self.draw(source, True)
-        for sink in solution['sinks']:
-            self.draw(sink, False)
-        for from_, to in solution['flows']:
-            self.draw_flow(from_.centre(), to.centre())
+        if 'sources' in data:
+            for source in data['sources']:
+                self.draw(source, True)
+        if 'sinks' in data:
+            for sink in data['sinks']:
+                self.draw(sink, False)
+        if 'flows' in data:
+            for from_, to in data['flows']:
+                self.draw_flow(from_.centre(), to.centre())
 
     def clear(self):
         self.canvas.delete('all')
