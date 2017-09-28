@@ -10,8 +10,8 @@ json_filetypes = [('JSON files', '*.json'), ('JSON files', '*.JSON')]
 def invalid_json_file(owner):
     messagebox.showerror('JSON file does not exist', 'Please give a path to an existing JSON file.', parent = owner)
 
-def empty_export(owner):
-    messagebox.showerror('Nothing to export', 'Please generate some data to export.', parent = owner)
+def no_data(owner):
+    messagebox.showerror('No data', 'Please generate some data first.', parent = owner)
 
 def browse_json(owner):
     filename = filedialog.askopenfilename(initialdir = settings.get('last_opened_source_dir'), filetypes = json_filetypes, parent = owner)

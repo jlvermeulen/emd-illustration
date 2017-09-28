@@ -10,8 +10,6 @@ from visualiser import Visualiser
 import os.path, cProfile
 
 class MainWindow(tk.Frame):
-    data = {}
-
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -32,6 +30,7 @@ class MainWindow(tk.Frame):
         self.sidebar = tk.Frame(self)
         self.sidebar.grid(row = 0, column = 1, sticky = 'news')
         tk.Grid.columnconfigure(self.sidebar, 0, weight = 1)
+        tk.Grid.rowconfigure(self.sidebar, 11, weight = 1)
 
         load_button     = tk.Button(self.sidebar, text = 'Load file', command = self.load_file)
         separator1      = ttk.Separator(self.sidebar)
@@ -44,6 +43,7 @@ class MainWindow(tk.Frame):
         solve_button    = tk.Button(self.sidebar, text = 'Solve', command = self.solve)
         export_button   = tk.Button(self.sidebar, text = 'Export', command = self.export)
         clear_button    = tk.Button(self.sidebar, text = 'Clear', command = self.visualiser.clear)
+        self.cost_label = tk.Label(self.sidebar)
 
         load_button     .grid(row = 0, column = 0, sticky = 'news')
         separator1      .grid(row = 1, column = 0, sticky = 'news', pady = 5)
@@ -56,6 +56,7 @@ class MainWindow(tk.Frame):
         solve_button    .grid(row = 8, column = 0, sticky = 'news')
         export_button   .grid(row = 9, column = 0, sticky = 'news')
         clear_button    .grid(row = 10, column = 0, sticky = 'news')
+        self.cost_label .grid(row = 11, column = 0, sticky = 'ws')
 
         tk.Grid.columnconfigure(toggles, 0, weight = 1, uniform = 'toggles')
         tk.Grid.columnconfigure(toggles, 1, weight = 1, uniform = 'toggles')
@@ -94,19 +95,29 @@ class MainWindow(tk.Frame):
             print('Warning: number of sources and sinks not equal, this is currently not supported.')
 
         self.visualiser.draw_all(self.data)
+        self.show_cost(self.data)
 
     def solve(self):
+        if not hasattr(self, 'data'):
+            dialog.no_data(self)
+            return
+
         self.solution = solver.solve(self.data, int(self.subdivions_entry.get()))
+
         self.visualiser.draw_all(self.solution)
+        self.show_cost(self.solution)
 
     def export(self):
-        if hasattr(self, 'solution'):
-            dialog.empty_export(self)
+        if not hasattr(self, 'solution'):
+            dialog.no_data(self)
             return
 
         filename = dialog.browse_export(self)
         if filename:
             exporter.export(self.solution, filename)
+
+    def show_cost(self, solution):
+        self.cost_label.config(text = 'Cost: {:g}'.format(solver.cost(solution)))
 
 def main():
     root = tk.Tk()

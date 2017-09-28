@@ -30,3 +30,13 @@ def subdivide(sources, sinks, subdivs):
 
 def calculate_costs(source, sinks):
     return [(sink.centre() - source.centre()).length() for sink in sinks]
+
+def cost(solution):
+    if not 'flows' in solution:
+        return 0
+
+    cost = 0
+    for flow in solution['flows']:
+        cost += (flow[0].centre() - flow[1].centre()).length() * flow[0].weight
+
+    return cost
