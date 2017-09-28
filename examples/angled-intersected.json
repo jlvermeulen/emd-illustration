@@ -1,0 +1,39 @@
+{
+    "sources":
+    [
+        {
+            "type": "segment",
+            "start":
+            {
+                "type": "point",
+                "x": 300,
+                "y": 100
+            },
+            "end":
+            {
+                "type": "point",
+                "x": 800,
+                "y": 100
+            }
+        }
+    ],
+
+    "sinks":
+    [
+        {
+            "type": "segment",
+            "start":
+            {
+                "type": "point",
+                "x": 550,
+                "y": 46.44661
+            },
+            "end":
+            {
+                "type": "point",
+                "x": 846.44661,
+                "y": 350
+            }
+        }
+    ]
+}
