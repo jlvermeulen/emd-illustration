@@ -90,6 +90,9 @@ class MainWindow(tk.Frame):
 
     def load_file(self):
         filename = dialog.browse_json(self)
+        if not filename:
+            return
+
         self.data = loader.load(filename)
         if len(self.data['sources']) != len(self.data['sinks']):
             print('Warning: number of sources and sinks not equal, this is currently not supported.')
