@@ -35,15 +35,15 @@ class Visualiser(tk.Frame):
 
     def draw_all(self, data):
         self.clear()
+        if 'flows' in data:
+            for from_, to in data['flows']:
+                self.draw_flow(from_.centre(), to.centre())
         if 'sources' in data:
             for source in data['sources']:
                 self.draw(source, True)
         if 'sinks' in data:
             for sink in data['sinks']:
                 self.draw(sink, False)
-        if 'flows' in data:
-            for from_, to in data['flows']:
-                self.draw_flow(from_.centre(), to.centre())
 
     def clear(self):
         self.canvas.delete('all')
