@@ -6,6 +6,9 @@ class Point:
         self.y = float(y)
         self.weight = float(weight)
 
+    def __str__(self):
+        return '({}, {})'.format(self.x, self.y)
+
     def __add__(self, other):
         return Point(self.x + other.x, self.y + other.y, self.weight)
 
@@ -23,6 +26,24 @@ class Point:
 
     def __neg__(self):
         return Point(-self.x, -self.y, self.weight)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __lt__(self, other):
+        return self.x < other.x or (self.x == other.x and self.y < other.y)
+
+    def __le__(self, other):
+        return self < other or self == other
+
+    def __ge__(self, other):
+        return not self < other
+
+    def __gt__(self, other):
+        return not self <= other
 
     def length_squared(self):
         return self.x * self.x + self.y * self.y

@@ -11,6 +11,9 @@ class Segment:
         self.end = end
         self.weight = float(weight)
 
+    def __str__(self):
+        return '[{}, {}]'.format(self.start, self.end)
+
     def centre(self):
         return Point((self.start.x + self.end.x) / 2, (self.start.y + self.end.y) / 2, self.weight)
 
