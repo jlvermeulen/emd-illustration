@@ -36,8 +36,8 @@ class Visualiser(tk.Frame):
     def draw_all(self, data):
         self.clear()
         if 'flows' in data:
-            for from_, to in data['flows']:
-                self.draw_flow(from_.centre(), to.centre())
+            for flow in data['flows']:
+                self.draw_flow(flow.start, flow.end)
         if 'sources' in data:
             for source in data['sources']:
                 self.draw(source, True)

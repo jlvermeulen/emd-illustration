@@ -7,7 +7,7 @@ import settings, solver, loader, exporter, dialog
 from geometry import *
 from visualiser import Visualiser
 
-import os.path, cProfile
+import os.path, cProfile, sys
 
 class MainWindow(tk.Frame):
     def __init__(self, parent):
@@ -77,7 +77,7 @@ class MainWindow(tk.Frame):
                 button2.invoke()
 
         subdivions_label        = tk.Label(subdivisions, text = 'Subdivisions:')
-        self.subdivions_entry   = tk.Spinbox(subdivisions, from_ = 0, to = 100, width = 5)
+        self.subdivions_entry   = tk.Spinbox(subdivisions, from_ = 0, to = 1000, width = 5)
 
         subdivions_label        .pack(side = 'left')
         self.subdivions_entry   .pack(side = 'left')
@@ -110,6 +110,30 @@ class MainWindow(tk.Frame):
         self.visualiser.draw_all(self.solution)
         self.show_cost(self.solution)
 
+        if len(self.data['sources']) == 1 and len(self.data['sinks']) == 1:
+            split = supporting_line_intersection(self.data['sources'][0], self.data['sinks'][0])
+            if not split:
+                return
+
+            print(split)
+
+            sides = ''
+            current, last_left, last_right, left, right = 0, -1, -1, 0, 0
+            for flow in sorted(self.solution['flows'], key = lambda x: (x.start - split).length_squared()):
+                if flow.end <= split:
+                    left += 1
+                    last_left = current
+                    sides += 'l'
+                else:
+                    right += 1
+                    last_right = current
+                    sides += 'r'
+                current += 1
+
+            print(sides)
+            print('left: {}, right: {}, last_left: {}, last_right: {}'.format(left, right, last_left, last_right))
+            sys.stdout.flush()
+
     def export(self):
         if not hasattr(self, 'solution'):
             dialog.no_data(self)
@@ -120,7 +144,7 @@ class MainWindow(tk.Frame):
             exporter.export(self.solution, filename)
 
     def show_cost(self, solution):
-        self.cost_label.config(text = 'Cost: {:g}'.format(solver.cost(solution)))
+        self.cost_label.config(text = 'Cost: {:g}'.format(solution['cost'] if 'cost' in solution else 0))
 
 def main():
     root = tk.Tk()
