@@ -20,12 +20,12 @@
             [
                 {
                     "name": "Run",
-                    "cmd": ["python", "emd-illustrator.py", "--data-dir", "../dist"],
+                    "cmd": ["python", "-u", "emd-illustrator.py", "--data-dir", "../dist"],
                     "shell_cmd": "",
 
                     "linux":
                     {
-                        "cmd": ["python3", "emd-illustrator.py", "--data-dir", "../dist"]
+                        "cmd": ["python3", "-u", "emd-illustrator.py", "--data-dir", "../dist"]
                     }
                 },
 
