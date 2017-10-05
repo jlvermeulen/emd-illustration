@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-import geometry
+import geometry, distance
 
 def solve(data, subdivs):
     subbed_sources, subbed_sinks = subdivide(data['sources'], data['sinks'], subdivs)
@@ -30,4 +30,4 @@ def subdivide(sources, sinks, subdivs):
     return subbed_sources, subbed_sinks
 
 def calculate_costs(source, sinks):
-    return [(sink.centre() - source.centre()).length() for sink in sinks]
+    return [distance.dist(sink.centre(), source.centre()) for sink in sinks]

@@ -3,7 +3,7 @@
 from tkinter import ttk
 import tkinter as tk
 
-import settings, solver, loader, exporter, dialog
+import settings, solver, loader, exporter, dialog, distance
 from geometry import *
 from visualiser import Visualiser
 
@@ -16,6 +16,7 @@ class MainWindow(tk.Frame):
 
         self.category = tk.StringVar()
         self.type = tk.StringVar()
+        self.metric = tk.StringVar()
 
         self.parent.title('emd-illustrator')
         self.pack(fill = 'both', expand = 1, padx = 5, pady = 5)
@@ -30,7 +31,7 @@ class MainWindow(tk.Frame):
         self.sidebar = tk.Frame(self)
         self.sidebar.grid(row = 0, column = 1, sticky = 'news')
         tk.Grid.columnconfigure(self.sidebar, 0, weight = 1)
-        tk.Grid.rowconfigure(self.sidebar, 11, weight = 1)
+        tk.Grid.rowconfigure(self.sidebar, 12, weight = 1)
 
         load_button     = tk.Button(self.sidebar, text = 'Load file', command = self.load_file)
         separator1      = ttk.Separator(self.sidebar)
@@ -39,6 +40,7 @@ class MainWindow(tk.Frame):
         separator2      = ttk.Separator(self.sidebar)
         options_label   = tk.Label(self.sidebar, text = 'Options')
         subdivisions    = tk.Frame(self.sidebar)
+        distance_metric = tk.Frame(self.sidebar)
         separator3      = ttk.Separator(self.sidebar)
         solve_button    = tk.Button(self.sidebar, text = 'Solve', command = self.solve)
         export_button   = tk.Button(self.sidebar, text = 'Export', command = self.export)
@@ -52,11 +54,12 @@ class MainWindow(tk.Frame):
         separator2      .grid(row = 4, column = 0, sticky = 'news', pady = 5)
         options_label   .grid(row = 5, column = 0, sticky = 'news', pady = (0, 5))
         subdivisions    .grid(row = 6, column = 0, sticky = 'news')
-        separator3      .grid(row = 7, column = 0, sticky = 'news', pady = 5)
-        solve_button    .grid(row = 8, column = 0, sticky = 'news')
-        export_button   .grid(row = 9, column = 0, sticky = 'news')
-        clear_button    .grid(row = 10, column = 0, sticky = 'news')
-        self.cost_label .grid(row = 11, column = 0, sticky = 'ws')
+        distance_metric .grid(row = 7, column = 0, sticky = 'news')
+        separator3      .grid(row = 8, column = 0, sticky = 'news', pady = 5)
+        solve_button    .grid(row = 9, column = 0, sticky = 'news')
+        export_button   .grid(row = 10, column = 0, sticky = 'news')
+        clear_button    .grid(row = 11, column = 0, sticky = 'news')
+        self.cost_label .grid(row = 12, column = 0, sticky = 'ws')
 
         tk.Grid.columnconfigure(toggles, 0, weight = 1, uniform = 'toggles')
         tk.Grid.columnconfigure(toggles, 1, weight = 1, uniform = 'toggles')
@@ -82,6 +85,21 @@ class MainWindow(tk.Frame):
         subdivions_label        .pack(side = 'left')
         self.subdivions_entry   .pack(side = 'left')
 
+        metric_label            = tk.Label(distance_metric, text = 'Distance:')
+        metric_buttons          = tk.Frame(distance_metric)
+
+        i = 0
+        for name in distance.distance_metrics.keys():
+            button = tk.Radiobutton(metric_buttons, text = name, variable = self.metric, value = name)
+            button.grid(row = 0, column = i, sticky = 'news')
+            tk.Grid.columnconfigure(metric_buttons, i, weight = 1, uniform = 'metric')
+
+            if i == 0:
+                button.invoke()
+            i += 1
+
+        metric_label.pack(side = 'left')
+        metric_buttons.pack(side = 'left')
 
     def destroy(self):
         settings.set('main_window_geometry', self._nametowidget(self.winfo_parent()).geometry())
@@ -104,6 +122,8 @@ class MainWindow(tk.Frame):
         if not hasattr(self, 'data'):
             dialog.no_data(self)
             return
+
+        distance.switch_metric(self.metric.get())
 
         self.solution = solver.solve(self.data, int(self.subdivions_entry.get()))
 
