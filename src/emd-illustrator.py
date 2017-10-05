@@ -42,7 +42,7 @@ class MainWindow(tk.Frame):
         separator3      = ttk.Separator(self.sidebar)
         solve_button    = tk.Button(self.sidebar, text = 'Solve', command = self.solve)
         export_button   = tk.Button(self.sidebar, text = 'Export', command = self.export)
-        clear_button    = tk.Button(self.sidebar, text = 'Clear', command = self.visualiser.clear)
+        clear_button    = tk.Button(self.sidebar, text = 'Clear', command = self.clear)
         self.cost_label = tk.Label(self.sidebar)
 
         load_button     .grid(row = 0, column = 0, sticky = 'news')
@@ -142,6 +142,11 @@ class MainWindow(tk.Frame):
         filename = dialog.browse_export(self)
         if filename:
             exporter.export(self.solution, filename)
+
+    def clear(self):
+        self.visualiser.clear()
+        del self.data
+        del self.solution
 
     def show_cost(self, solution):
         self.cost_label.config(text = 'Cost: {:g}'.format(solution['cost'] if 'cost' in solution else 0))
