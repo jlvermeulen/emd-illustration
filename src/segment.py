@@ -1,7 +1,7 @@
 from point import Point
 
 class Segment:
-    def __init__(self, start, end, weight = 0):
+    def __init__(self, start, end, weight = 1):
         if not isinstance(start, Point):
             raise TypeError('start must be a Point')
         if not isinstance(end, Point):
@@ -9,7 +9,7 @@ class Segment:
 
         self.start = start
         self.end = end
-        self.weight = float(weight)
+        self.weight = int(weight)
 
     def __str__(self):
         return '[{}, {}]'.format(self.start, self.end)

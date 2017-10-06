@@ -23,9 +23,16 @@ def subdivide(sources, sinks, subdivs):
     subbed_sinks   = []
 
     for source in sources:
-        subbed_sources += source.subdivide(subdivs)
+        weight_split = source.subdivide(source.weight - 1)
+        for part in weight_split:
+            subbed_sources += part.subdivide(subdivs)
     for sink in sinks:
-        subbed_sinks += sink.subdivide(subdivs)
+        weight_split = sink.subdivide(sink.weight - 1)
+        for part in weight_split:
+            subbed_sinks += part.subdivide(subdivs)
+
+    if len(subbed_sources) != len(subbed_sinks):
+        print('Total weight is not equal, solution may be incomplete.')
 
     return subbed_sources, subbed_sinks
 

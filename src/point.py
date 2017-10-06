@@ -1,10 +1,10 @@
 from math import sqrt
 
 class Point:
-    def __init__(self, x, y, weight = 0):
+    def __init__(self, x, y, weight = 1):
         self.x = float(x)
         self.y = float(y)
-        self.weight = float(weight)
+        self.weight = int(weight)
 
     def __str__(self):
         return '({}, {})'.format(self.x, self.y)

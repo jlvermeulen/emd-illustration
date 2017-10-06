@@ -8,7 +8,7 @@ def switch_metric(metric):
 
 def dist_L1(p1, p2):
     diff = p1 - p2
-    return abs(diff.x) + abs(diff.y)
+    return abs(diff.x) + abs(diff.y) + dist_L2(p1, p2) / 1000000
 
 def dist_L2(p1, p2):
     diff = p1 - p2
@@ -16,7 +16,7 @@ def dist_L2(p1, p2):
 
 def dist_Linf(p1, p2):
     diff = p1 - p2
-    return max(abs(diff.x), abs(diff.y))
+    return max(abs(diff.x), abs(diff.y)) + dist_L2(p1, p2) / 1000000
 
 distance_metrics = {
     'L1': dist_L1,

@@ -112,9 +112,6 @@ class MainWindow(tk.Frame):
             return
 
         self.data = loader.load(filename)
-        if len(self.data['sources']) != len(self.data['sinks']):
-            print('Warning: number of sources and sinks not equal, this is currently not supported.')
-
         self.visualiser.draw_all(self.data)
         self.show_cost(self.data)
 
