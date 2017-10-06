@@ -16,7 +16,7 @@ def dist_L2(p1, p2):
 
 def dist_Linf(p1, p2):
     diff = p1 - p2
-    return max(diff.x, diff.y)
+    return max(abs(diff.x), abs(diff.y))
 
 distance_metrics = {
     'L1': dist_L1,
