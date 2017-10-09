@@ -1,5 +1,6 @@
 from point import Point
 from segment import Segment
+from polygon import Polygon
 
 def supporting_line_intersection(seg1, seg2):
     diff1 = seg1.start - seg1.end

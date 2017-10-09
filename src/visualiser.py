@@ -24,8 +24,16 @@ class Visualiser(tk.Frame):
     def draw_segment(self, segment, issource):
         self.draw_segment_(segment, 1, 'red' if issource else 'blue')
 
-    def draw_flow(self, source, sink):
+    def draw_flow_segment(self, source, sink):
         self.draw_segment_(geometry.Segment(source, sink), 0, 'black')
+
+    def draw_flow_polygon(self, vertices):
+        coords = []
+        for vert in vertices:
+            coords.append(vert.x)
+            coords.append(vert.y)
+
+        self.canvas.create_polygon(coords, fill = 'grey', outline = 'black')
 
     def draw(self, obj, issource):
         if isinstance(obj, geometry.Point):
@@ -37,7 +45,10 @@ class Visualiser(tk.Frame):
         self.clear()
         if 'flows' in data:
             for flow in data['flows']:
-                self.draw_flow(flow.start, flow.end)
+                if isinstance(flow, geometry.Segment):
+                    self.draw_flow_segment(flow.start, flow.end)
+                elif isinstance(flow, geometry.Polygon):
+                    self.draw_flow_polygon(flow.vertices)
         if 'sources' in data:
             for source in data['sources']:
                 self.draw(source, True)

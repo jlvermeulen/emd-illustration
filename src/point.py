@@ -6,7 +6,7 @@ class Point:
         self.y = float(y)
         self.weight = int(weight)
 
-    def __str__(self):
+    def __repr__(self):
         return '({}, {})'.format(self.x, self.y)
 
     def __add__(self, other):
