@@ -4,7 +4,12 @@ from scipy.optimize import linear_sum_assignment
 import geometry, distance
 
 def solve(data, subdivs):
-    subbed_sources, subbed_sinks = subdivide(data['sources'], data['sinks'], subdivs)
+    subbed_sources = subdivide(data['sources'], subdivs)
+    subbed_sinks   = subdivide(data['sinks'], subdivs)
+
+    if len(subbed_sources) != len(subbed_sinks):
+        print('Total weight is not equal, solution may be incomplete.')
+
     distances = []
     for source in subbed_sources:
         distances.append(calculate_costs(source, subbed_sinks))
@@ -18,23 +23,15 @@ def solve(data, subdivs):
 
     return { 'sources': subbed_sources, 'sinks': subbed_sinks, 'flows': flows, 'cost': cost_matrix[row_ind, col_ind].sum() / (subdivs + 1) }
 
-def subdivide(sources, sinks, subdivs):
-    subbed_sources = []
-    subbed_sinks   = []
+def subdivide(data, subdivs):
+    subbed_data = []
 
-    for source in sources:
-        weight_split = source.subdivide(source.weight - 1)
+    for dat in data:
+        weight_split = dat.subdivide(dat.weight - 1)
         for part in weight_split:
-            subbed_sources += part.subdivide(subdivs)
-    for sink in sinks:
-        weight_split = sink.subdivide(sink.weight - 1)
-        for part in weight_split:
-            subbed_sinks += part.subdivide(subdivs)
+            subbed_data += part.subdivide(subdivs)
 
-    if len(subbed_sources) != len(subbed_sinks):
-        print('Total weight is not equal, solution may be incomplete.')
-
-    return subbed_sources, subbed_sinks
+    return subbed_data
 
 def calculate_costs(source, sinks):
     return [distance.dist(sink.centre(), source.centre()) for sink in sinks]
