@@ -10,6 +10,8 @@ def parse_object(dic):
     if 'type' in dic:
         t = dic['type']
         if t == 'point':
+            if dic['x'] < 0 or dic['y'] < 0:
+                raise ValueError('Negative coordinates are not supported')
             return geometry.Point(dic['x'], dic['y'], dic['weight'] if 'weight' in dic else 1)
         if t == 'segment':
             return geometry.Segment(dic['start'], dic['end'], dic['weight'] if 'weight' in dic else 1)

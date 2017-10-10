@@ -37,7 +37,6 @@ def solve_points_to_horizontal_segment_exact(data):
         end = start + direction * source.weight
         flow_polygons.append(geometry.Polygon([source, end, start]))
         start = end
-        print(flow_polygons[-1])
 
     return { 'sources': data['sources'], 'sinks': data['sinks'], 'flows': flow_polygons, 'cost': 0 }
 

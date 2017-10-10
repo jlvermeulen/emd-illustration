@@ -1,4 +1,6 @@
 import tkinter as tk
+from PIL import Image, ImageDraw, ImageTk
+import math
 
 import geometry
 
@@ -35,6 +37,44 @@ class Visualiser(tk.Frame):
 
         self.canvas.create_polygon(coords, fill = 'grey', outline = 'black')
 
+    def draw_flow_polygons(self, polygons):
+        bboxes = []
+        polys  = []
+        bbox = [float('inf'), float('inf'), 0, 0]
+
+        for poly in polygons:
+            minx, miny, maxx, maxy = float('inf'), float('inf'), 0, 0
+            for v in poly.vertices:
+                minx = math.floor(min(minx, v.x))
+                miny = math.floor(min(miny, v.y))
+                maxx = math.ceil(max(maxx, v.x))
+                maxy = math.ceil(max(maxy, v.y))
+
+            bboxes.append((minx, miny, maxx, maxy))
+            bbox[0] = math.floor(min(bbox[0], minx))
+            bbox[1] = math.floor(min(bbox[1], miny))
+            bbox[2] = math.ceil(max(bbox[2], maxx))
+            bbox[3] = math.ceil(max(bbox[3], maxy))
+
+            poly_image = Image.new('RGBA', (maxx - minx, maxy - miny))
+            poly_draw  = ImageDraw.Draw(poly_image)
+            poly_draw.polygon([(v.x - minx, v.y - miny) for v in poly.vertices], fill = (128, 128, 128, 64), outline = (0, 0, 0, 255))
+
+            polys.append(poly_image)
+
+        composite = Image.new('RGBA', (bbox[2] - bbox[0], bbox[3] - bbox[1]), (255, 255, 255, 255))
+        for i in range(len(polys)):
+            composite.paste(polys[i], (bboxes[i][0] - bbox[0], bboxes[i][1] - bbox[1]), mask = polys[i])
+
+        self.image = ImageTk.PhotoImage(composite)
+        self.canvas.create_image(bbox[0], bbox[1], anchor = 'nw', image = self.image)
+
+    def draw_flow(self, flow):
+        if isinstance(flow, geometry.Segment):
+            self.draw_flow_segment(flow.start, flow.end)
+        elif isinstance(flow, geometry.Polygon):
+            self.draw_flow_polygon(flow.vertices)
+
     def draw(self, obj, issource):
         if isinstance(obj, geometry.Point):
             self.draw_point(obj, issource)
@@ -44,11 +84,11 @@ class Visualiser(tk.Frame):
     def draw_all(self, data):
         self.clear()
         if 'flows' in data:
-            for flow in data['flows']:
-                if isinstance(flow, geometry.Segment):
-                    self.draw_flow_segment(flow.start, flow.end)
-                elif isinstance(flow, geometry.Polygon):
-                    self.draw_flow_polygon(flow.vertices)
+            if all(isinstance(x, geometry.Polygon) for x in data['flows']):
+                self.draw_flow_polygons(data['flows'])
+            else:
+                for flow in data['flows']:
+                    self.draw_flow(flow)
         if 'sources' in data:
             for source in data['sources']:
                 self.draw(source, True)
