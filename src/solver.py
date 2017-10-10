@@ -5,8 +5,8 @@ import geometry, distance
 
 def solve(data, subdivs):
     if all(isinstance(x, geometry.Point) for x in data['sources']):
-        if distance.get_metric() == 'L1' and len(data['sinks']) == 1 and isinstance(data['sinks'][0], geometry.Segment) and data['sinks'][0].start.y == data['sinks'][0].end.y:
-            return solve_points_to_horizontal_segment_exact(data)
+       if distance.get_metric() == 'L1' and len(data['sinks']) == 1 and isinstance(data['sinks'][0], geometry.Segment) and data['sinks'][0].start.y == data['sinks'][0].end.y:
+           return solve_points_to_horizontal_segment_L1_exact(data)
 
     return solve_general(data, subdivs)
 
@@ -26,21 +26,36 @@ def solve_general(data, subdivs):
 
     return { 'sources': subbed_sources, 'sinks': subbed_sinks, 'flows': flows, 'cost': cost_matrix[row_ind, col_ind].sum() / (subdivs + 1) }
 
-def solve_points_to_horizontal_segment_exact(data):
+def solve_points_to_horizontal_segment_L1_exact(data):
     sink = data['sinks'][0]
+    if sink.start.x > sink.end.x:
+        sink.start, sink.end = sink.end, sink.start
 
     flow_polygons = []
     start = sink.start
     direction = (sink.end - sink.start) / sink.weight
 
+    total_cost = 0
     for source in sorted(data['sources'], key = lambda x: x.x):
         end = start + direction * source.weight
         flow_polygons.append(geometry.Polygon([source, end, start]))
+
+        half_left  = (min(end.x, source.x) + start.x) / 2
+        half_right = (end.x + max(start.x, source.x)) / 2
+        left_len   = max(0, min(source.x, end.x) - start.x)
+        right_len  = max(0, end.x - max(source.x, start.x))
+        total_len  = end.x - start.x
+
+        cost  = source.y - sink.start.y
+        cost += (source.x - half_left) * left_len / total_len
+        cost += (half_right - source.x) * right_len / total_len
+
         start = end
+        total_cost += cost * source.weight
 
-    return { 'sources': data['sources'], 'sinks': data['sinks'], 'flows': flow_polygons, 'cost': 0 }
+    return { 'sources': data['sources'], 'sinks': data['sinks'], 'flows': flow_polygons, 'cost': total_cost }
 
-def solve_points_to_horizontal_segment(data, subdivs):
+def solve_points_to_horizontal_segment_L1(data, subdivs):
     subbed_sources, subbed_sinks = subdivide_input(data, subdivs)
 
     flows = []
