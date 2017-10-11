@@ -46,7 +46,7 @@ def solve_points_to_horizontal_segment_L1_exact(data):
         right_len  = max(0, end.x - max(source.x, start.x))
         total_len  = end.x - start.x
 
-        cost  = source.y - sink.start.y
+        cost  = abs(source.y - sink.start.y)
         cost += (source.x - half_left) * left_len / total_len
         cost += (half_right - source.x) * right_len / total_len
 
