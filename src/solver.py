@@ -4,9 +4,13 @@ from scipy.optimize import linear_sum_assignment
 import geometry, distance
 
 def solve(data, subdivs):
-    if all(isinstance(x, geometry.Point) for x in data['sources']):
-       if distance.get_metric() == 'L1' and len(data['sinks']) == 1 and isinstance(data['sinks'][0], geometry.Segment) and data['sinks'][0].start.y == data['sinks'][0].end.y:
-           return solve_points_to_horizontal_segment_L1_exact(data)
+    if sum(x.weight for x in data['sources']) != sum(x.weight for x in data['sinks']):
+        print('Total weight of sources and sinks not equal, solution may be incomplete.')
+
+    if all(isinstance(x, geometry.Point) for x in data['sources']) and all(isinstance(x, geometry.Segment) for x in data['sinks']):
+        y = data['sinks'][0].start.y
+        if distance.get_metric() == 'L1' and all(x.start.y == y and x.end.y == y for x in data['sinks']):
+           return solve_points_to_horizontal_collinear_segments_L1_exact(data)
 
     return solve_general(data, subdivs)
 
@@ -26,32 +30,64 @@ def solve_general(data, subdivs):
 
     return { 'sources': subbed_sources, 'sinks': subbed_sinks, 'flows': flows, 'cost': cost_matrix[row_ind, col_ind].sum() / (subdivs + 1) }
 
-def solve_points_to_horizontal_segment_L1_exact(data):
-    sink = data['sinks'][0]
-    if sink.start.x > sink.end.x:
-        sink.start, sink.end = sink.end, sink.start
+def solve_points_to_horizontal_collinear_segments_L1_exact(data):
+    sinks = geometry.resolve_horizontal_segment_overlaps(data['sinks'])
+    sorted_sources = sorted(data['sources'], key = lambda x: x.x)
+
+    sink_index = 0
+    start = sinks[sink_index].start
+    direction = (sinks[sink_index].end - sinks[sink_index].start) / sinks[sink_index].weight
+
+    source_index = 0
+    remaining_weight = sorted_sources[source_index].weight
 
     flow_polygons = []
-    start = sink.start
-    direction = (sink.end - sink.start) / sink.weight
+    while True:
+        next_sink, next_source = False, False
+
+        end = start + direction * remaining_weight
+
+        if end.x <= sinks[sink_index].end.x:
+            next_source = True
+
+        if end.x >= sinks[sink_index].end.x:
+            next_sink = True
+            remaining_weight = (end.x - sinks[sink_index].end.x) / direction.x
+            end = sinks[sink_index].end
+
+        flow_polygons.append(geometry.Polygon([sorted_sources[source_index], end, start]))
+
+        start = end
+
+        if next_sink:
+            sink_index += 1
+            if sink_index == len(sinks):
+                break
+
+            start = sinks[sink_index].start
+            direction = (sinks[sink_index].end - sinks[sink_index].start) / sinks[sink_index].weight
+
+        if next_source:
+            source_index += 1
+            if source_index == len(sorted_sources):
+                break
+
+            remaining_weight = sorted_sources[source_index].weight
 
     total_cost = 0
-    for source in sorted(data['sources'], key = lambda x: x.x):
-        end = start + direction * source.weight
-        flow_polygons.append(geometry.Polygon([source, end, start]))
+    for poly in flow_polygons:
+        source, right, left = poly.vertices
+        half_left  = (min(right.x, source.x) + left.x) / 2
+        half_right = (right.x + max(left.x, source.x)) / 2
+        left_len   = max(0, min(source.x, right.x) - left.x)
+        right_len  = max(0, right.x - max(source.x, left.x))
+        total_len  = right.x - left.x
 
-        half_left  = (min(end.x, source.x) + start.x) / 2
-        half_right = (end.x + max(start.x, source.x)) / 2
-        left_len   = max(0, min(source.x, end.x) - start.x)
-        right_len  = max(0, end.x - max(source.x, start.x))
-        total_len  = end.x - start.x
-
-        cost  = abs(source.y - sink.start.y)
+        cost  = abs(source.y - right.y)
         cost += (source.x - half_left) * left_len / total_len
         cost += (half_right - source.x) * right_len / total_len
 
-        start = end
-        total_cost += cost * source.weight
+        total_cost += cost * remaining_weight
 
     return { 'sources': data['sources'], 'sinks': data['sinks'], 'flows': flow_polygons, 'cost': total_cost }
 
@@ -96,7 +132,7 @@ def subdivide_input(data, subdivs):
     subbed_sinks   = subdivide(data['sinks'], subdivs)
 
     if len(subbed_sources) != len(subbed_sinks):
-        print('Total weight is not equal, solution may be incomplete.')
+        print('Number of subdivided sinks and sources not equal, solution may be incomplete.')
 
     return subbed_sources, subbed_sinks
 
