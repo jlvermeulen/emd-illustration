@@ -45,16 +45,16 @@ class Visualiser(tk.Frame):
         for poly in polygons:
             minx, miny, maxx, maxy = float('inf'), float('inf'), 0, 0
             for v in poly.vertices:
-                minx = math.floor(min(minx, v.x))
-                miny = math.floor(min(miny, v.y))
-                maxx = math.ceil(max(maxx, v.x))
-                maxy = math.ceil(max(maxy, v.y))
+                minx = math.floor(min(minx, v.x)) - 1
+                miny = math.floor(min(miny, v.y)) - 1
+                maxx = math.ceil(max(maxx, v.x)) + 1
+                maxy = math.ceil(max(maxy, v.y)) + 1
 
             bboxes.append((minx, miny, maxx, maxy))
-            bbox[0] = math.floor(min(bbox[0], minx))
-            bbox[1] = math.floor(min(bbox[1], miny))
-            bbox[2] = math.ceil(max(bbox[2], maxx))
-            bbox[3] = math.ceil(max(bbox[3], maxy))
+            bbox[0] = min(bbox[0], minx)
+            bbox[1] = min(bbox[1], miny)
+            bbox[2] = max(bbox[2], maxx)
+            bbox[3] = max(bbox[3], maxy)
 
             poly_image = Image.new('RGBA', (maxx - minx, maxy - miny))
             poly_draw  = ImageDraw.Draw(poly_image)
