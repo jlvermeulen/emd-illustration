@@ -4,10 +4,10 @@ class Segment:
     def __init__(self, start, end, weight = 1):
         self.start = start
         self.end = end
-        self.weight = int(weight)
+        self.weight = float(weight)
 
     def __repr__(self):
-        return '<{}, {}>'.format(self.start, self.end)
+        return '<{}, {}, {}>'.format(self.start, self.end, self.weight)
 
     def centre(self):
         return Point((self.start.x + self.end.x) / 2, (self.start.y + self.end.y) / 2, self.weight)

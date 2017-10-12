@@ -104,7 +104,7 @@ def subdivide(data, subdivs):
     subbed_data = []
 
     for dat in data:
-        weight_split = dat.subdivide(dat.weight - 1)
+        weight_split = dat.subdivide(int(dat.weight) - 1)
         for part in weight_split:
             subbed_data += part.subdivide(subdivs)
 
