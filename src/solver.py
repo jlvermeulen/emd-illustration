@@ -19,7 +19,7 @@ def solve_general(data, subdivs):
 
     distances = []
     for source in subbed_sources:
-        distances.append(calculate_costs(source, subbed_sinks))
+        distances.append(calculate_distances(source, subbed_sinks))
 
     cost_matrix = np.array(distances)
     row_ind, col_ind = linear_sum_assignment(cost_matrix)
@@ -55,7 +55,7 @@ def solve_points_to_horizontal_collinear_segments_L1_exact(data):
             remaining_weight = (end.x - sinks[sink_index].end.x) / direction.x
             end = sinks[sink_index].end
 
-        flow_polygons.append(geometry.Polygon([sorted_sources[source_index], end, start]))
+        flow_polygons.append(geometry.Polygon([sorted_sources[source_index], end, start], (end.x - start.x) / (sinks[sink_index].end.x - sinks[sink_index].start.x) * sinks[sink_index].weight))
 
         start = end
 
@@ -87,7 +87,7 @@ def solve_points_to_horizontal_collinear_segments_L1_exact(data):
         cost += (source.x - half_left) * left_len / total_len
         cost += (half_right - source.x) * right_len / total_len
 
-        total_cost += cost * remaining_weight
+        total_cost += cost * poly.weight
 
     return { 'sources': data['sources'], 'sinks': data['sinks'], 'flows': flow_polygons, 'cost': total_cost }
 
@@ -98,7 +98,7 @@ def solve_points_to_horizontal_segment_L1(data, subdivs):
     claimed = [False] * len(subbed_sinks)
     total_cost = 0
     for source in sorted(data['sources'], key = lambda x: x.x):
-        distances = calculate_costs(source, subbed_sinks)
+        distances = calculate_distances(source, subbed_sinks)
 
         start = 0
         for i in range(len(subbed_sinks)):
@@ -146,5 +146,5 @@ def subdivide(data, subdivs):
 
     return subbed_data
 
-def calculate_costs(source, sinks):
+def calculate_distances(source, sinks):
     return [distance.dist(sink.centre(), source.centre()) for sink in sinks]
