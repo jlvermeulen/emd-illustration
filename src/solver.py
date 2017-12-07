@@ -77,15 +77,13 @@ def solve_points_to_horizontal_collinear_segments_L1_exact(data):
     total_cost = 0
     for poly in flow_polygons:
         source, right, left = poly.vertices
-        half_left  = (min(right.x, source.x) + left.x) / 2
-        half_right = (right.x + max(left.x, source.x)) / 2
-        left_len   = max(0, min(source.x, right.x) - left.x)
-        right_len  = max(0, right.x - max(source.x, left.x))
-        total_len  = right.x - left.x
+        left_len  = source.x - left.x
+        right_len = right.x - source.x
+        total_len = right.x - left.x
 
         cost  = abs(source.y - right.y)
-        cost += (source.x - half_left) * left_len / total_len
-        cost += (half_right - source.x) * right_len / total_len
+        cost += (left_len * abs(left_len) / 2) / total_len
+        cost += (right_len * abs(right_len) / 2) / total_len
 
         total_cost += cost * poly.weight
 
