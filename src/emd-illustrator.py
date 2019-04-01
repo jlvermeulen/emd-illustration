@@ -31,7 +31,7 @@ class MainWindow(tk.Frame):
         self.sidebar = tk.Frame(self)
         self.sidebar.grid(row = 0, column = 1, sticky = 'news')
         tk.Grid.columnconfigure(self.sidebar, 0, weight = 1)
-        tk.Grid.rowconfigure(self.sidebar, 12, weight = 1)
+        tk.Grid.rowconfigure(self.sidebar, 14, weight = 1)
 
         load_button     = tk.Button(self.sidebar, text = 'Load file', command = self.load_file)
         separator1      = ttk.Separator(self.sidebar)
@@ -40,11 +40,13 @@ class MainWindow(tk.Frame):
         separator2      = ttk.Separator(self.sidebar)
         options_label   = tk.Label(self.sidebar, text = 'Options')
         subdivisions    = tk.Frame(self.sidebar)
+        epsilon         = tk.Frame(self.sidebar)
         distance_metric = tk.Frame(self.sidebar)
         separator3      = ttk.Separator(self.sidebar)
         solve_button    = tk.Button(self.sidebar, text = 'Solve', command = self.solve)
         export_button   = tk.Button(self.sidebar, text = 'Export', command = self.export)
         clear_button    = tk.Button(self.sidebar, text = 'Clear', command = self.clear)
+        subdiv_button   = tk.Button(self.sidebar, text = 'Subdivide', command = self.subdivide)
         self.cost_label = tk.Label(self.sidebar)
 
         load_button     .grid(row = 0, column = 0, sticky = 'news')
@@ -54,12 +56,14 @@ class MainWindow(tk.Frame):
         separator2      .grid(row = 4, column = 0, sticky = 'news', pady = 5)
         options_label   .grid(row = 5, column = 0, sticky = 'news', pady = (0, 5))
         subdivisions    .grid(row = 6, column = 0, sticky = 'news')
-        distance_metric .grid(row = 7, column = 0, sticky = 'news')
-        separator3      .grid(row = 8, column = 0, sticky = 'news', pady = 5)
-        solve_button    .grid(row = 9, column = 0, sticky = 'news')
-        export_button   .grid(row = 10, column = 0, sticky = 'news')
-        clear_button    .grid(row = 11, column = 0, sticky = 'news')
-        self.cost_label .grid(row = 12, column = 0, sticky = 'ws')
+        epsilon         .grid(row = 7, column = 0, sticky = 'news')
+        distance_metric .grid(row = 8, column = 0, sticky = 'news')
+        separator3      .grid(row = 9, column = 0, sticky = 'news', pady = 5)
+        solve_button    .grid(row = 10, column = 0, sticky = 'news')
+        export_button   .grid(row = 11, column = 0, sticky = 'news')
+        clear_button    .grid(row = 12, column = 0, sticky = 'news')
+        subdiv_button   .grid(row = 13, column = 0, sticky = 'news')
+        self.cost_label .grid(row = 14, column = 0, sticky = 'ws')
 
         tk.Grid.columnconfigure(toggles, 0, weight = 1, uniform = 'toggles')
         tk.Grid.columnconfigure(toggles, 1, weight = 1, uniform = 'toggles')
@@ -84,6 +88,12 @@ class MainWindow(tk.Frame):
 
         subdivions_label        .pack(side = 'left')
         self.subdivions_entry   .pack(side = 'left')
+
+        epsilon_label           = tk.Label(epsilon, text = 'Epsilon: ')
+        self.epsilon_entry      = tk.Spinbox(epsilon, from_ = 0.001, to = 1, increment = 0.001, width = 5)
+
+        epsilon_label           .pack(side = 'left')
+        self.epsilon_entry      .pack(side = 'left')
 
         metric_label            = tk.Label(distance_metric, text = 'Distance:')
         metric_buttons          = tk.Frame(distance_metric)
@@ -164,6 +174,46 @@ class MainWindow(tk.Frame):
         self.visualiser.clear()
         del self.data
         del self.solution
+
+    def subdivide(self):
+        if not hasattr(self, 'data'):
+            dialog.no_data(self)
+            return
+
+        distance.switch_metric(self.metric.get())
+        delta = float(self.epsilon_entry.get()) / 5
+
+        while True:
+            done = True
+            new_sinks = []
+            for sink in self.data['sinks']:
+                untouched = True
+                for source in self.data['sources']:
+                    t = ((source.x - sink.start.x) * (sink.end.x - sink.start.x) + (source.y - sink.start.y) * (sink.end.y - sink.start.y)) / (sink.start - sink.end).length_squared()
+                    t = max(0, min(1, t))
+
+                    closest = distance.dist(source, Point(sink.start.x + t * (sink.end.x - sink.start.x), sink.start.y + t * (sink.end.y - sink.start.y)))
+                    furthest = max(distance.dist(sink.start, source), distance.dist(sink.end, source))
+
+                    print('closest: {} ({})'.format(closest, Point(sink.start.x + t * (sink.end.x - sink.start.x), sink.start.y + t * (sink.end.y - sink.start.y))))
+                    print('furthest: {}'.format(furthest))
+                    print('ratio: {}'.format(furthest / closest))
+
+                    if furthest / closest > 1 + delta:
+                        print('subdividing {} into {}'.format(sink, sink.subdivide(1)))
+                        new_sinks += sink.subdivide(1)
+                        done = False
+                        untouched = False
+                        break
+
+                if untouched:
+                    new_sinks += [sink]
+
+            if done:
+                break
+            self.data['sinks'] = new_sinks
+
+        self.visualiser.draw_all(self.data)
 
     def show_cost(self, solution):
         self.cost_label.config(text = 'Cost: {:g}'.format(solution['cost'] if 'cost' in solution else 0))
